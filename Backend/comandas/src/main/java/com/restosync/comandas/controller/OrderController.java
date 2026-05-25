@@ -57,7 +57,7 @@ public class OrderController {
     // ── Creación ──────────────────────────────────────────────────────────────
  
     @PostMapping
-    @PreAuthorize("hasRole('MESERO')")
+    @PreAuthorize("hasAnyRole('MESERO', 'ADMINISTRADOR')")
     @Operation(summary = "Crear nueva comanda",
                description = "El sistema calcula el total y enruta automáticamente a cocina y/o bar")
     public ResponseEntity<ApiResponse<OrderResponse>> create(
@@ -73,7 +73,7 @@ public class OrderController {
     // ── Cambio de estado ──────────────────────────────────────────────────────
  
     @PatchMapping("/{id}/status")
-    @PreAuthorize("hasAnyRole('COCINERO', 'BARTENDER', 'MESERO')")
+    @PreAuthorize("hasAnyRole('COCINERO', 'BARTENDER', 'MESERO', 'ADMINISTRADOR')")
     @Operation(summary = "Cambiar estado del pedido",
                description = "Flujo válido: PENDIENTE → EN_PREPARACION → LISTO → ENTREGADO. " +
                              "La validación de rol por categoría se aplica en el servicio.")
@@ -89,7 +89,7 @@ public class OrderController {
     // ── Edición de ítems ──────────────────────────────────────────────────────
  
     @PatchMapping("/{id}/items")
-    @PreAuthorize("hasRole('MESERO')")
+    @PreAuthorize("hasAnyRole('MESERO', 'ADMINISTRADOR')")
     @Operation(summary = "Editar ítems del pedido",
                description = "Solo disponible mientras el pedido esté en estado PENDIENTE")
     public ResponseEntity<ApiResponse<OrderResponse>> editItems(
@@ -104,7 +104,7 @@ public class OrderController {
     // ── Cancelación ───────────────────────────────────────────────────────────
  
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('MESERO')")
+    @PreAuthorize("hasAnyRole('MESERO', 'ADMINISTRADOR')")
     @Operation(summary = "Cancelar pedido",
                description = "Requiere motivo obligatorio. Solo disponible en estado PENDIENTE.")
     public ResponseEntity<ApiResponse<OrderResponse>> cancel(
@@ -137,13 +137,15 @@ public class OrderController {
     }
  
     @GetMapping("/my")
-    @PreAuthorize("hasRole('MESERO')")
+    @PreAuthorize("hasAnyRole('MESERO', 'ADMINISTRADOR')")
     @Operation(summary = "Mis comandas activas",
                description = "Comandas del mesero autenticado que no están ENTREGADAS ni CANCELADAS")
     public ResponseEntity<ApiResponse<List<OrderResponse>>> getMy(
             @AuthenticationPrincipal SecurityUser principal) {
  
-        List<OrderResponse> orders = orderService.obtenerActivosPorMesero(principal.getUserId());
+        List<OrderResponse> orders = principal.getRole() == UserRole.ADMINISTRADOR
+                ? orderService.obtenerActivos()
+                : orderService.obtenerActivosPorMesero(principal.getUserId());
         return ResponseEntity.ok(ApiResponse.ok(orders));
     }
  

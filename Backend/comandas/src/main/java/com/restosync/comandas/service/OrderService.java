@@ -71,7 +71,8 @@ public class OrderService {
     public List<OrderResponse> obtenerActivosPorCategoria(ProductCategory categoria) {
         List<OrderStatus> estadosActivos = List.of(
                 OrderStatus.PENDIENTE,
-                OrderStatus.EN_PREPARACION
+                OrderStatus.EN_PREPARACION,
+                OrderStatus.LISTO
         );
         return orderMapper.toResponseList(
                 orderRepository.findActiveByItemCategory(estadosActivos, categoria)
@@ -83,6 +84,11 @@ public class OrderService {
         return orderMapper.toResponseList(
                 orderRepository.findActiveByWaiter(waiterId)
         );
+    }
+
+    @Transactional(readOnly = true)
+    public List<OrderResponse> obtenerActivos() {
+        return orderMapper.toResponseList(orderRepository.findActive());
     }
  
     @Transactional(readOnly = true)

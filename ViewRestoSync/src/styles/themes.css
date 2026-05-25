@@ -1,0 +1,81 @@
+/*
+  Paletas globales tomadas de los exports BananaAI.
+  - admin: admin-operations-dashboard + menu-management.
+  - operations: vistas operativas restantes y disponibilidad.
+  Este archivo es responsable de exponer variables CSS reutilizables por tema.
+*/
+
+:root,
+[data-theme='operations'] {
+  --background: #f6f8fa;
+  --foreground: #0f1724;
+  --border: #00000014;
+  --input: #ffffff;
+  --primary: #0ea5a4;
+  --primary-foreground: #ffffff;
+  --secondary: #f2f4f7;
+  --secondary-foreground: #374151;
+  --muted: #f3f4f6;
+  --muted-foreground: #8a8f98;
+  --success: #16a34a;
+  --success-foreground: #ffffff;
+  --accent: #2563eb;
+  --accent-foreground: #ffffff;
+  --destructive: #dc2626;
+  --destructive-foreground: #ffffff;
+  --warning: #f59e0b;
+  --warning-foreground: #121419;
+  --card: #ffffff;
+  --card-foreground: #0f1724;
+  --sidebar: #ffffff;
+  --sidebar-foreground: #2b2b2b;
+  --sidebar-primary: #e6fffa;
+  --sidebar-primary-foreground: #0ea5a4;
+
+  --text: var(--muted-foreground);
+  --text-h: var(--foreground);
+  --bg: var(--background);
+  --surface: var(--card);
+  --app-bg: var(--background);
+  --accent-bg: color-mix(in srgb, var(--primary) 11%, transparent);
+  --accent-border: color-mix(in srgb, var(--primary) 42%, transparent);
+  --code-bg: var(--muted);
+  --social-bg: var(--secondary);
+}
+
+[data-theme='admin'] {
+  --background: #fbfbfb;
+  --foreground: #0f172a;
+  --border: #00000014;
+  --input: #ffffff;
+  --primary: #ff6a00;
+  --primary-foreground: #ffffff;
+  --secondary: #f6f7f9;
+  --secondary-foreground: #374151;
+  --muted: #f3f4f6;
+  --muted-foreground: #8a8f98;
+  --success: #16a34a;
+  --success-foreground: #ffffff;
+  --accent: #3b82f6;
+  --accent-foreground: #ffffff;
+  --destructive: #dc2626;
+  --destructive-foreground: #ffffff;
+  --warning: #f59e0b;
+  --warning-foreground: #121419;
+  --card: #ffffff;
+  --card-foreground: #0f172a;
+  --sidebar: #ffffff;
+  --sidebar-foreground: #2b2b2b;
+  --sidebar-primary: #fff7ed;
+  --sidebar-primary-foreground: #ff6a00;
+
+  --text: var(--muted-foreground);
+  --text-h: var(--foreground);
+  --bg: var(--background);
+  --surface: var(--card);
+  --app-bg: var(--background);
+  --accent-bg: color-mix(in srgb, var(--primary) 11%, transparent);
+  --accent-border: color-mix(in srgb, var(--primary) 42%, transparent);
+  --code-bg: var(--muted);
+  --social-bg: var(--secondary);
+}

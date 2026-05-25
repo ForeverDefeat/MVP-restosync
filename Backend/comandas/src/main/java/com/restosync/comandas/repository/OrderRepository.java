@@ -46,6 +46,17 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
             ORDER BY o.createdAt DESC
             """)
     List<Order> findActiveByWaiter(@Param("waiterId") Long waiterId);
+
+    /**
+     * Todos los pedidos activos. Usado por ADMINISTRADOR cuando entra
+     * a la vista operativa de mesero.
+     */
+    @Query("""
+            SELECT o FROM Order o
+            WHERE o.status NOT IN ('ENTREGADO', 'CANCELADO')
+            ORDER BY o.createdAt DESC
+            """)
+    List<Order> findActive();
  
     // ── Historial paginado con filtros opcionales ────────────────────────────
  
