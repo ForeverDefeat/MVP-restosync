@@ -2,3 +2,10 @@
 .vscode
 .vscode/
 context/
+Backend/comandas/target/
+ViewRestoSync/node_modules/
+ViewRestoSync/dist/
+ViewRestoSync/coverage/
+ViewRestoSync/playwright-report/
+ViewRestoSync/test-results/
+.env

@@ -1,6 +1,7 @@
 package com.restosync.comandas.exception;
 
 import com.restosync.comandas.dto.response.ApiResponse;
+import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -111,7 +112,14 @@ public class GlobalExceptionHandler {
                 .status(HttpStatus.UNAUTHORIZED)
                 .body(ApiResponse.error("AUTHENTICATION_ERROR", "Error de autenticación", 401));
     }
- 
+
+    @ExceptionHandler(TooManyLoginAttemptsException.class)
+    public ResponseEntity<ApiResponse<Void>> handleTooManyLoginAttempts(TooManyLoginAttemptsException ex) {
+        return ResponseEntity
+                .status(HttpStatus.TOO_MANY_REQUESTS)
+                .body(ApiResponse.error("TOO_MANY_LOGIN_ATTEMPTS", ex.getMessage(), 429));
+    }
+
     // ── 400 Bad Request ───────────────────────────────────────────────────────
  
     /**
@@ -161,6 +169,27 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .badRequest()
                 .body(ApiResponse.error("TYPE_MISMATCH", message, 400));
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<ApiResponse<Map<String, String>>> handleConstraintViolation(
+            ConstraintViolationException ex) {
+
+        Map<String, String> fieldErrors = new LinkedHashMap<>();
+        ex.getConstraintViolations().forEach(violation -> {
+            String path = violation.getPropertyPath().toString();
+            fieldErrors.put(path.substring(path.lastIndexOf('.') + 1), violation.getMessage());
+        });
+
+        return ResponseEntity
+                .badRequest()
+                .body(ApiResponse.<Map<String, String>>builder()
+                        .success(false)
+                        .error("VALIDATION_ERROR")
+                        .message("Error de validacion en los parametros enviados")
+                        .data(fieldErrors)
+                        .status(400)
+                        .build());
     }
  
     // ── 500 Internal Server Error (fallback) ──────────────────────────────────

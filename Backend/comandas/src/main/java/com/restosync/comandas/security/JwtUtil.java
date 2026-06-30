@@ -6,6 +6,7 @@ import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -38,6 +39,19 @@ public class JwtUtil {
  
     @Value("${jwt.expiration}")
     private Long expiration;
+
+    @Value("${spring.profiles.active:dev}")
+    private String activeProfiles;
+
+    @PostConstruct
+    void validateConfiguration() {
+        if (secret == null || secret.length() < 32) {
+            throw new IllegalStateException("jwt.secret debe tener al menos 32 caracteres.");
+        }
+        if (activeProfiles.contains("prod") && secret.contains("dev-secret")) {
+            throw new IllegalStateException("JWT_SECRET de produccion no puede usar el secreto de desarrollo.");
+        }
+    }
  
     // ── Generación ────────────────────────────────────────────────────────────
  

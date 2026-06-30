@@ -25,6 +25,7 @@ com\restosync\comandas\dto\response\UserResponse$UserResponseBuilder.class
 com\restosync\comandas\dto\request\CreateProductRequest.class
 com\restosync\comandas\exception\GlobalExceptionHandler.class
 com\restosync\comandas\dto\request\CancelOrderRequest.class
+com\restosync\comandas\exception\TooManyLoginAttemptsException.class
 com\restosync\comandas\security\JwtAuthFilter.class
 com\restosync\comandas\exception\ResourceNotFoundException.class
 com\restosync\comandas\mapper\OrderItemMapperImpl.class
@@ -48,13 +49,16 @@ com\restosync\comandas\repository\AuditLogRepository.class
 com\restosync\comandas\dto\response\ProductResponse$ProductResponseBuilder.class
 com\restosync\comandas\dto\response\ApiResponse$ApiResponseBuilder.class
 com\restosync\comandas\mapper\OrderItemMapper.class
+com\restosync\comandas\util\TextNormalizer.class
 com\restosync\comandas\dto\request\UpdateUserRoleRequest.class
 com\restosync\comandas\entity\AuditLog.class
 com\restosync\comandas\dto\request\CreateOrderRequest.class
 com\restosync\comandas\repository\OrderRepository.class
+com\restosync\comandas\config\WebSocketConfig$1.class
 com\restosync\comandas\config\SecurityConfig.class
 com\restosync\comandas\controller\UserController.class
 com\restosync\comandas\dto\response\UserResponse.class
+com\restosync\comandas\service\LoginAttemptService$AttemptBucket.class
 com\restosync\comandas\dto\response\ApiResponse.class
 com\restosync\comandas\dto\response\ProductResponse.class
 com\restosync\comandas\entity\AuditLog$AuditLogBuilder.class
@@ -73,4 +77,5 @@ com\restosync\comandas\entity\User.class
 com\restosync\comandas\mapper\UserMapper.class
 com\restosync\comandas\repository\UserRepository.class
 com\restosync\comandas\service\OrderService.class
+com\restosync\comandas\service\LoginAttemptService.class
 com\restosync\comandas\entity\Order$OrderBuilder.class

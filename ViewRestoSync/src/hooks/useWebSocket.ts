@@ -5,6 +5,19 @@ import { useQueryClient } from '@tanstack/react-query'
 import { queryKeys } from './queryKeys'
 
 const WS_URL = import.meta.env.VITE_WS_URL ?? 'http://localhost:8080/ws'
+const AUTH_STORAGE_KEY = 'restosync-auth'
+
+const getStoredToken = () => {
+  try {
+    const raw = localStorage.getItem(AUTH_STORAGE_KEY)
+    if (!raw) return null
+
+    const parsed = JSON.parse(raw) as { state?: { token?: string } }
+    return parsed.state?.token ?? null
+  } catch {
+    return null
+  }
+}
 
 /**
  * Abre una conexion STOMP/SockJS para invalidar caches cuando backend notifica cambios.
@@ -27,6 +40,7 @@ export const useWebSocket = (enabled = true) => {
       if (cancelled) return
 
       const stompClient = new Client({
+        connectHeaders: getStoredToken() ? { Authorization: `Bearer ${getStoredToken()}` } : {},
         reconnectDelay: 5000,
         webSocketFactory: () => new SockJS(WS_URL),
         onConnect: () => {

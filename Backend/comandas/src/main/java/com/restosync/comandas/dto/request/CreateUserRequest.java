@@ -17,7 +17,7 @@ public class CreateUserRequest {
     private String email;
  
     @NotBlank(message = "La contraseña es obligatoria")
-    @Size(min = 8, message = "La contraseña debe tener al menos 8 caracteres")
+    @Size(min = 8, max = 128, message = "La contraseña debe tener entre 8 y 128 caracteres")
     private String password;
  
     @NotNull(message = "El rol es obligatorio")

@@ -11,8 +11,8 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-05-25T13:59:37-0500",
-    comments = "version: 1.6.3, compiler: Eclipse JDT (IDE) 3.46.0.v20260407-0427, environment: Java 21.0.10 (Eclipse Adoptium)"
+    date = "2026-06-29T18:51:10-0500",
+    comments = "version: 1.6.3, compiler: javac, environment: Java 22.0.2 (Oracle Corporation)"
 )
 @Component
 public class OrderMapperImpl implements OrderMapper {
@@ -30,14 +30,14 @@ public class OrderMapperImpl implements OrderMapper {
 
         orderResponse.waiterId( orderWaiterId( order ) );
         orderResponse.waiterName( orderWaiterName( order ) );
-        orderResponse.cancellationReason( order.getCancellationReason() );
-        orderResponse.createdAt( order.getCreatedAt() );
         orderResponse.id( order.getId() );
-        orderResponse.items( orderItemMapper.toResponseList( order.getItems() ) );
-        orderResponse.status( order.getStatus() );
-        orderResponse.tableOrRegister( order.getTableOrRegister() );
         orderResponse.ticketNumber( order.getTicketNumber() );
+        orderResponse.tableOrRegister( order.getTableOrRegister() );
+        orderResponse.status( order.getStatus() );
         orderResponse.total( order.getTotal() );
+        orderResponse.cancellationReason( order.getCancellationReason() );
+        orderResponse.items( orderItemMapper.toResponseList( order.getItems() ) );
+        orderResponse.createdAt( order.getCreatedAt() );
         orderResponse.updatedAt( order.getUpdatedAt() );
 
         return orderResponse.build();

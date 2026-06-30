@@ -10,11 +10,13 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
  
 import java.util.List;
@@ -32,6 +34,7 @@ import java.util.List;
 @RequestMapping("/api/users")
 @RequiredArgsConstructor
 @PreAuthorize("hasRole('ADMINISTRADOR')")
+@Validated
 @Tag(name = "Usuarios y roles", description = "Gestión de personal y permisos")
 @SecurityRequirement(name = "bearerAuth")
 public class UserController {
@@ -48,7 +51,8 @@ public class UserController {
  
     @GetMapping("/{id}")
     @Operation(summary = "Obtener usuario por ID")
-    public ResponseEntity<ApiResponse<UserResponse>> getById(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<UserResponse>> getById(
+            @PathVariable @Positive(message = "El ID del usuario debe ser mayor a cero") Long id) {
         // Fix: el service expone buscarPorId(), no obtenerPorId()
         UserResponse user = userService.buscarPorId(id);
         return ResponseEntity.ok(ApiResponse.ok(user));
@@ -70,7 +74,7 @@ public class UserController {
     @Operation(summary = "Cambiar rol de usuario",
                description = "El usuario deberá iniciar sesión nuevamente para aplicar el nuevo rol")
     public ResponseEntity<ApiResponse<UserResponse>> updateRole(
-            @PathVariable Long id,
+            @PathVariable @Positive(message = "El ID del usuario debe ser mayor a cero") Long id,
             @Valid @RequestBody UpdateUserRoleRequest request,
             @AuthenticationPrincipal SecurityUser principal) {
  
@@ -81,7 +85,7 @@ public class UserController {
     @PatchMapping("/{id}/active")
     @Operation(summary = "Activar o desactivar usuario")
     public ResponseEntity<ApiResponse<UserResponse>> toggleActive(
-            @PathVariable Long id,
+            @PathVariable @Positive(message = "El ID del usuario debe ser mayor a cero") Long id,
             @AuthenticationPrincipal SecurityUser principal) {
  
         UserResponse updated = userService.toggleActivo(id, principal.getUser());

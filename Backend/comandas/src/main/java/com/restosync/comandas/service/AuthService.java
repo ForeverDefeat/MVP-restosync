@@ -8,6 +8,7 @@ import com.restosync.comandas.exception.ResourceNotFoundException;
 import com.restosync.comandas.mapper.UserMapper;
 import com.restosync.comandas.repository.UserRepository;
 import com.restosync.comandas.security.JwtUtil;
+import com.restosync.comandas.util.TextNormalizer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -44,14 +45,15 @@ public class AuthService {
         // 1. Valida credenciales — lanza BadCredentialsException si fallan
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
-                        request.getEmail(),
+                        TextNormalizer.email(request.getEmail()),
                         request.getPassword()
                 )
         );
  
         // 2. Carga el usuario completo desde la BD
-        User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new ResourceNotFoundException("Usuario", "email", request.getEmail()));
+        String email = TextNormalizer.email(request.getEmail());
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario", "email", email));
  
         // 3. Verifica que el usuario esté activo
         if (!user.getActive()) {

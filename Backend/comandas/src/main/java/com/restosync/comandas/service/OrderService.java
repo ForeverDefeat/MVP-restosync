@@ -18,6 +18,7 @@ import com.restosync.comandas.exception.UnauthorizedRoleException;
 import com.restosync.comandas.mapper.OrderMapper;
 import com.restosync.comandas.repository.OrderRepository;
 import com.restosync.comandas.repository.ProductRepository;
+import com.restosync.comandas.util.TextNormalizer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -95,6 +96,13 @@ public class OrderService {
     public OrderResponse buscarPorId(Long id) {
         return orderMapper.toResponse(obtenerEntidad(id));
     }
+
+    @Transactional(readOnly = true)
+    public OrderResponse buscarPorId(Long id, User currentUser) {
+        Order order = obtenerEntidad(id);
+        validarAccesoLectura(currentUser, order);
+        return orderMapper.toResponse(order);
+    }
  
     @Transactional(readOnly = true)
     public PagedResponse<OrderResponse> obtenerHistorial(
@@ -122,7 +130,7 @@ public class OrderService {
         // 1. Construir la entidad Order vacía
         Order order = Order.builder()
                 .ticketNumber(generarTicketNumber())
-                .tableOrRegister(request.getTableOrRegister())
+                .tableOrRegister(TextNormalizer.required(request.getTableOrRegister()))
                 .status(OrderStatus.PENDIENTE)
                 .waiter(waiter)
                 .build();
@@ -146,7 +154,7 @@ public class OrderService {
                     .category(product.getCategory())
                     .quantity(itemReq.getQuantity())
                     .unitPrice(product.getPrice())
-                    .notes(itemReq.getNotes())
+                    .notes(TextNormalizer.nullable(itemReq.getNotes()))
                     .build();
  
             order.addItem(item);
@@ -198,6 +206,7 @@ public class OrderService {
  
         // 2. Validar permisos por rol y categoría
         validarPermisoPorRol(currentUser.getRole(), estadoAct, estadoNvo, order);
+        validarPropiedadMesero(currentUser, order, "cambiar el estado de pedidos de otros meseros");
  
         // 3. Aplicar cambio
         order.setStatus(estadoNvo);
@@ -230,6 +239,7 @@ public class OrderService {
     @Transactional
     public OrderResponse cancelar(Long id, CancelOrderRequest request, User currentUser) {
         Order order = obtenerEntidad(id);
+        validarPropiedadMesero(currentUser, order, "cancelar pedidos de otros meseros");
  
         // Solo se puede cancelar en estado PENDIENTE
         if (order.getStatus() != OrderStatus.PENDIENTE) {
@@ -241,7 +251,7 @@ public class OrderService {
         }
  
         order.setStatus(OrderStatus.CANCELADO);
-        order.setCancellationReason(request.getReason());
+        order.setCancellationReason(TextNormalizer.required(request.getReason()));
         order = orderRepository.save(order);
  
         OrderResponse response = orderMapper.toResponse(order);
@@ -268,6 +278,7 @@ public class OrderService {
     @Transactional
     public OrderResponse editarItems(Long id, EditOrderItemsRequest request, User currentUser) {
         Order order = obtenerEntidad(id);
+        validarPropiedadMesero(currentUser, order, "editar pedidos de otros meseros");
  
         // Solo se puede editar en PENDIENTE
         if (order.getStatus() != OrderStatus.PENDIENTE) {
@@ -299,7 +310,7 @@ public class OrderService {
                     .category(product.getCategory())
                     .quantity(itemReq.getQuantity())
                     .unitPrice(product.getPrice())
-                    .notes(itemReq.getNotes())
+                    .notes(TextNormalizer.nullable(itemReq.getNotes()))
                     .build();
  
             order.addItem(item);
@@ -388,6 +399,26 @@ public class OrderService {
  
     // ── Utilitarios ──────────────────────────────────────────────────────────
  
+    private void validarAccesoLectura(User currentUser, Order order) {
+        if (currentUser.getRole() == UserRole.ADMINISTRADOR) return;
+        if (currentUser.getRole() == UserRole.MESERO && order.getWaiter().getId().equals(currentUser.getId())) return;
+        if (currentUser.getRole() == UserRole.COCINERO && contieneCategoria(order, ProductCategory.PLATO)) return;
+        if (currentUser.getRole() == UserRole.BARTENDER && contieneCategoria(order, ProductCategory.BEBIDA)) return;
+
+        throw new UnauthorizedRoleException(currentUser.getRole(), "consultar este pedido");
+    }
+
+    private void validarPropiedadMesero(User currentUser, Order order, String accion) {
+        if (currentUser.getRole() != UserRole.MESERO) return;
+        if (!order.getWaiter().getId().equals(currentUser.getId())) {
+            throw new UnauthorizedRoleException(currentUser.getRole(), accion);
+        }
+    }
+
+    private boolean contieneCategoria(Order order, ProductCategory categoria) {
+        return order.getItems().stream().anyMatch(item -> item.getCategory() == categoria);
+    }
+
     private Order obtenerEntidad(Long id) {
         return orderRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Comanda", id));

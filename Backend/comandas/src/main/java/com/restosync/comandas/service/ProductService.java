@@ -8,6 +8,7 @@ import com.restosync.comandas.enums.ProductCategory;
 import com.restosync.comandas.exception.ResourceNotFoundException;
 import com.restosync.comandas.mapper.ProductMapper;
 import com.restosync.comandas.repository.ProductRepository;
+import com.restosync.comandas.util.TextNormalizer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -30,7 +31,7 @@ public class ProductService {
     @Transactional(readOnly = true)
     public List<ProductResponse> buscar(String search, ProductCategory category, Boolean available) {
         return productMapper.toResponseList(
-                productRepository.searchProducts(search, category, available)
+                productRepository.searchProducts(TextNormalizer.nullable(search), category, available)
         );
     }
  

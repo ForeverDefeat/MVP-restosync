@@ -13,8 +13,8 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-05-25T13:59:36-0500",
-    comments = "version: 1.6.3, compiler: Eclipse JDT (IDE) 3.46.0.v20260407-0427, environment: Java 21.0.10 (Eclipse Adoptium)"
+    date = "2026-06-29T18:51:10-0500",
+    comments = "version: 1.6.3, compiler: javac, environment: Java 22.0.2 (Oracle Corporation)"
 )
 @Component
 public class AuditLogMapperImpl implements AuditLogMapper {
@@ -30,13 +30,13 @@ public class AuditLogMapperImpl implements AuditLogMapper {
         auditLogResponse.userId( auditLogUserId( auditLog ) );
         auditLogResponse.userName( auditLogUserName( auditLog ) );
         auditLogResponse.orderId( auditLogOrderId( auditLog ) );
+        auditLogResponse.id( auditLog.getId() );
         auditLogResponse.action( auditLog.getAction() );
-        auditLogResponse.createdAt( auditLog.getCreatedAt() );
         Map<String, Object> map = auditLog.getDetails();
         if ( map != null ) {
             auditLogResponse.details( new LinkedHashMap<String, Object>( map ) );
         }
-        auditLogResponse.id( auditLog.getId() );
+        auditLogResponse.createdAt( auditLog.getCreatedAt() );
 
         return auditLogResponse.build();
     }

@@ -10,11 +10,14 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
  
 import java.util.List;
@@ -31,6 +34,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/products")
 @RequiredArgsConstructor
+@Validated
 @Tag(name = "Catálogo de productos", description = "Gestión del menú — platos y bebidas")
 @SecurityRequirement(name = "bearerAuth")
 public class ProductController {
@@ -45,7 +49,8 @@ public class ProductController {
     public ResponseEntity<ApiResponse<List<ProductResponse>>> getProducts(
             @RequestParam(required = false) ProductCategory category,
             @RequestParam(required = false) Boolean         available,
-            @RequestParam(required = false) String          search) {
+            @RequestParam(required = false) @Size(max = 100, message = "La busqueda no puede superar 100 caracteres")
+            String search) {
  
         List<ProductResponse> products = productService.buscar(search, category, available);
         return ResponseEntity.ok(ApiResponse.ok(products));
@@ -53,7 +58,8 @@ public class ProductController {
  
     @GetMapping("/{id}")
     @Operation(summary = "Obtener producto por ID")
-    public ResponseEntity<ApiResponse<ProductResponse>> getProduct(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<ProductResponse>> getProduct(
+            @PathVariable @Positive(message = "El ID del producto debe ser mayor a cero") Long id) {
         // Fix: el service expone buscarPorId(), no obtenerPorId()
         ProductResponse product = productService.buscarPorId(id);
         return ResponseEntity.ok(ApiResponse.ok(product));
@@ -79,7 +85,7 @@ public class ProductController {
     @PreAuthorize("hasRole('ADMINISTRADOR')")
     @Operation(summary = "Editar producto completo")
     public ResponseEntity<ApiResponse<ProductResponse>> update(
-            @PathVariable Long id,
+            @PathVariable @Positive(message = "El ID del producto debe ser mayor a cero") Long id,
             @Valid @RequestBody CreateProductRequest request,
             // Fix: el service requiere currentUser para el audit log
             @AuthenticationPrincipal SecurityUser principal) {
@@ -93,7 +99,7 @@ public class ProductController {
     @Operation(summary = "Activar o desactivar producto",
                description = "Desactivación lógica — el historial se preserva")
     public ResponseEntity<ApiResponse<ProductResponse>> toggleAvailability(
-            @PathVariable Long id,
+            @PathVariable @Positive(message = "El ID del producto debe ser mayor a cero") Long id,
             // Fix: el service requiere currentUser para el audit log
             @AuthenticationPrincipal SecurityUser principal) {
  

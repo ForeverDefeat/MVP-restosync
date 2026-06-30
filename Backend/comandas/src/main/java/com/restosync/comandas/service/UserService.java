@@ -8,6 +8,7 @@ import com.restosync.comandas.exception.BusinessException;
 import com.restosync.comandas.exception.ResourceNotFoundException;
 import com.restosync.comandas.mapper.UserMapper;
 import com.restosync.comandas.repository.UserRepository;
+import com.restosync.comandas.util.TextNormalizer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -45,15 +46,16 @@ public class UserService {
  
     @Transactional
     public UserResponse crear(CreateUserRequest request, User currentUser) {
-        if (userRepository.existsByEmail(request.getEmail())) {
+        String email = TextNormalizer.email(request.getEmail());
+        if (userRepository.existsByEmail(email)) {
             throw new BusinessException(
-                    "Ya existe un usuario registrado con el email: " + request.getEmail()
+                    "Ya existe un usuario registrado con el email: " + email
             );
         }
  
         User user = User.builder()
-                .name(request.getName())
-                .email(request.getEmail())
+                .name(TextNormalizer.required(request.getName()))
+                .email(email)
                 .password(passwordEncoder.encode(request.getPassword()))
                 .role(request.getRole())
                 .active(true)
@@ -77,6 +79,10 @@ public class UserService {
     @Transactional
     public UserResponse actualizarRol(Long id, UserRole nuevoRol, User currentUser) {
         User user = obtenerEntidad(id);
+
+        if (user.getRole() == UserRole.ADMINISTRADOR && nuevoRol != UserRole.ADMINISTRADOR && esUltimoAdminActivo(user)) {
+            throw new BusinessException("No se puede cambiar el rol del ultimo administrador activo.");
+        }
  
         UserRole rolAnterior = user.getRole();
         user.setRole(nuevoRol);
@@ -102,6 +108,12 @@ public class UserService {
     @Transactional
     public UserResponse toggleActivo(Long id, User currentUser) {
         User user = obtenerEntidad(id);
+        if (user.getId().equals(currentUser.getId()) && user.getActive()) {
+            throw new BusinessException("No puedes desactivar tu propio usuario.");
+        }
+        if (user.getActive() && esUltimoAdminActivo(user)) {
+            throw new BusinessException("No se puede desactivar el ultimo administrador activo.");
+        }
         boolean nuevoEstado = !user.getActive();
         user.setActive(nuevoEstado);
         user = userRepository.save(user);
@@ -122,5 +134,11 @@ public class UserService {
     public User obtenerEntidad(Long id) {
         return userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Usuario", id));
+    }
+
+    private boolean esUltimoAdminActivo(User user) {
+        return user.getRole() == UserRole.ADMINISTRADOR
+                && Boolean.TRUE.equals(user.getActive())
+                && userRepository.countByRoleAndActive(UserRole.ADMINISTRADOR, true) <= 1;
     }
 }

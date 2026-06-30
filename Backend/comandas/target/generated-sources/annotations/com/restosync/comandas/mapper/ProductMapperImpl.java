@@ -10,8 +10,8 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-05-25T13:59:37-0500",
-    comments = "version: 1.6.3, compiler: Eclipse JDT (IDE) 3.46.0.v20260407-0427, environment: Java 21.0.10 (Eclipse Adoptium)"
+    date = "2026-06-29T18:51:10-0500",
+    comments = "version: 1.6.3, compiler: javac, environment: Java 22.0.2 (Oracle Corporation)"
 )
 @Component
 public class ProductMapperImpl implements ProductMapper {
@@ -24,14 +24,14 @@ public class ProductMapperImpl implements ProductMapper {
 
         ProductResponse.ProductResponseBuilder productResponse = ProductResponse.builder();
 
-        productResponse.available( product.getAvailable() );
-        productResponse.category( product.getCategory() );
-        productResponse.createdAt( product.getCreatedAt() );
-        productResponse.estimatedMinutes( product.getEstimatedMinutes() );
         productResponse.id( product.getId() );
-        productResponse.imageUrl( product.getImageUrl() );
         productResponse.name( product.getName() );
+        productResponse.category( product.getCategory() );
         productResponse.price( product.getPrice() );
+        productResponse.available( product.getAvailable() );
+        productResponse.estimatedMinutes( product.getEstimatedMinutes() );
+        productResponse.imageUrl( product.getImageUrl() );
+        productResponse.createdAt( product.getCreatedAt() );
         productResponse.updatedAt( product.getUpdatedAt() );
 
         return productResponse.build();
@@ -59,12 +59,12 @@ public class ProductMapperImpl implements ProductMapper {
 
         Product.ProductBuilder product = Product.builder();
 
-        product.available( request.getAvailable() );
+        product.name( request.getName() );
         product.category( request.getCategory() );
+        product.price( request.getPrice() );
+        product.available( request.getAvailable() );
         product.estimatedMinutes( request.getEstimatedMinutes() );
         product.imageUrl( request.getImageUrl() );
-        product.name( request.getName() );
-        product.price( request.getPrice() );
 
         return product.build();
     }
@@ -75,11 +75,11 @@ public class ProductMapperImpl implements ProductMapper {
             return;
         }
 
-        product.setAvailable( request.getAvailable() );
+        product.setName( request.getName() );
         product.setCategory( request.getCategory() );
+        product.setPrice( request.getPrice() );
+        product.setAvailable( request.getAvailable() );
         product.setEstimatedMinutes( request.getEstimatedMinutes() );
         product.setImageUrl( request.getImageUrl() );
-        product.setName( request.getName() );
-        product.setPrice( request.getPrice() );
     }
 }

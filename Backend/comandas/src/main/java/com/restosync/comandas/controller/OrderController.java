@@ -16,12 +16,17 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
  
 import java.time.LocalDateTime;
@@ -48,6 +53,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/orders")
 @RequiredArgsConstructor
+@Validated
 @Tag(name = "Pedidos (Comandas)", description = "Ciclo de vida completo de las comandas")
 @SecurityRequirement(name = "bearerAuth")
 public class OrderController {
@@ -78,7 +84,7 @@ public class OrderController {
                description = "Flujo válido: PENDIENTE → EN_PREPARACION → LISTO → ENTREGADO. " +
                              "La validación de rol por categoría se aplica en el servicio.")
     public ResponseEntity<ApiResponse<OrderResponse>> updateStatus(
-            @PathVariable Long id,
+            @PathVariable @Positive(message = "El ID del pedido debe ser mayor a cero") Long id,
             @Valid @RequestBody UpdateOrderStatusRequest request,
             @AuthenticationPrincipal SecurityUser principal) {
  
@@ -93,7 +99,7 @@ public class OrderController {
     @Operation(summary = "Editar ítems del pedido",
                description = "Solo disponible mientras el pedido esté en estado PENDIENTE")
     public ResponseEntity<ApiResponse<OrderResponse>> editItems(
-            @PathVariable Long id,
+            @PathVariable @Positive(message = "El ID del pedido debe ser mayor a cero") Long id,
             @Valid @RequestBody EditOrderItemsRequest request,
             @AuthenticationPrincipal SecurityUser principal) {
  
@@ -108,7 +114,7 @@ public class OrderController {
     @Operation(summary = "Cancelar pedido",
                description = "Requiere motivo obligatorio. Solo disponible en estado PENDIENTE.")
     public ResponseEntity<ApiResponse<OrderResponse>> cancel(
-            @PathVariable Long id,
+            @PathVariable @Positive(message = "El ID del pedido debe ser mayor a cero") Long id,
             @Valid @RequestBody CancelOrderRequest request,
             @AuthenticationPrincipal SecurityUser principal) {
  
@@ -153,8 +159,10 @@ public class OrderController {
  
     @GetMapping("/{id}")
     @Operation(summary = "Obtener pedido por ID")
-    public ResponseEntity<ApiResponse<OrderResponse>> getById(@PathVariable Long id) {
-        OrderResponse order = orderService.buscarPorId(id);
+    public ResponseEntity<ApiResponse<OrderResponse>> getById(
+            @PathVariable @Positive(message = "El ID del pedido debe ser mayor a cero") Long id,
+            @AuthenticationPrincipal SecurityUser principal) {
+        OrderResponse order = orderService.buscarPorId(id, principal.getUser());
         return ResponseEntity.ok(ApiResponse.ok(order));
     }
  
@@ -171,10 +179,12 @@ public class OrderController {
             @RequestParam(required = false)
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate,
  
-            @RequestParam(required = false) String      tableOrRegister,
+            @RequestParam(required = false) @Size(max = 50, message = "La mesa o caja no puede superar 50 caracteres")
+            String tableOrRegister,
             @RequestParam(required = false) OrderStatus status,
-            @RequestParam(defaultValue = "0")  int page,
-            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "0") @Min(value = 0, message = "La pagina no puede ser negativa") int page,
+            @RequestParam(defaultValue = "10") @Min(value = 1, message = "El tamano de pagina minimo es 1")
+            @Max(value = 100, message = "El tamano de pagina maximo es 100") int size,
  
             @AuthenticationPrincipal SecurityUser principal) {
  

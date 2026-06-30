@@ -20,6 +20,7 @@ C:\Users\User\Desktop\MVP-RestoSync\Backend\comandas\src\main\java\com\restosync
 C:\Users\User\Desktop\MVP-RestoSync\Backend\comandas\src\main\java\com\restosync\comandas\security\SecurityUser.java
 C:\Users\User\Desktop\MVP-RestoSync\Backend\comandas\src\main\java\com\restosync\comandas\dto\request\CreateUserRequest.java
 C:\Users\User\Desktop\MVP-RestoSync\Backend\comandas\src\main\java\com\restosync\comandas\entity\AuditLog.java
+C:\Users\User\Desktop\MVP-RestoSync\Backend\comandas\src\main\java\com\restosync\comandas\util\TextNormalizer.java
 C:\Users\User\Desktop\MVP-RestoSync\Backend\comandas\src\main\java\com\restosync\comandas\dto\response\ProductResponse.java
 C:\Users\User\Desktop\MVP-RestoSync\Backend\comandas\src\main\java\com\restosync\comandas\dto\response\AuditLogResponse.java
 C:\Users\User\Desktop\MVP-RestoSync\Backend\comandas\src\main\java\com\restosync\comandas\dto\request\CreateProductRequest.java
@@ -50,6 +51,8 @@ C:\Users\User\Desktop\MVP-RestoSync\Backend\comandas\src\main\java\com\restosync
 C:\Users\User\Desktop\MVP-RestoSync\Backend\comandas\src\main\java\com\restosync\comandas\entity\OrderItem.java
 C:\Users\User\Desktop\MVP-RestoSync\Backend\comandas\src\main\java\com\restosync\comandas\dto\response\ApiResponse.java
 C:\Users\User\Desktop\MVP-RestoSync\Backend\comandas\src\main\java\com\restosync\comandas\exception\ResourceNotFoundException.java
+C:\Users\User\Desktop\MVP-RestoSync\Backend\comandas\src\main\java\com\restosync\comandas\exception\TooManyLoginAttemptsException.java
+C:\Users\User\Desktop\MVP-RestoSync\Backend\comandas\src\main\java\com\restosync\comandas\service\LoginAttemptService.java
 C:\Users\User\Desktop\MVP-RestoSync\Backend\comandas\src\main\java\com\restosync\comandas\entity\Order.java
 C:\Users\User\Desktop\MVP-RestoSync\Backend\comandas\src\main\java\com\restosync\comandas\mapper\UserMapper.java
 C:\Users\User\Desktop\MVP-RestoSync\Backend\comandas\src\main\java\com\restosync\comandas\enums\OrderStatus.java

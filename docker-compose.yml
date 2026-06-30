@@ -1,0 +1,68 @@
+services:
+  mysql:
+    image: mysql:8.4
+    container_name: restosync-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-restosync_root_password}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-restosync_db}
+      MYSQL_USER: ${MYSQL_USER:-restosync}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-restosync_password}
+    ports:
+      - "${MYSQL_PORT:-3307}:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u$${MYSQL_USER} -p$${MYSQL_PASSWORD} --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+    networks:
+      - restosync
+
+  backend:
+    build:
+      context: ./Backend/comandas
+    container_name: restosync-backend
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-prod}
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/${MYSQL_DATABASE:-restosync_db}?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true&characterEncoding=UTF-8
+      SPRING_DATASOURCE_USERNAME: ${MYSQL_USER:-restosync}
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD:-restosync_password}
+      SPRING_SQL_INIT_MODE: ${SPRING_SQL_INIT_MODE:-always}
+      JWT_SECRET: ${JWT_SECRET:-change-this-restosync-compose-secret-minimum-256-bits-long}
+      JWT_EXPIRATION: ${JWT_EXPIRATION:-86400000}
+      APP_CORS_ALLOWED_ORIGINS: ${APP_CORS_ALLOWED_ORIGINS:-http://localhost:4173,http://127.0.0.1:4173}
+      APP_WS_ALLOWED_ORIGINS: ${APP_WS_ALLOWED_ORIGINS:-http://localhost:4173,http://127.0.0.1:4173}
+      SPRINGDOC_ENABLED: ${SPRINGDOC_ENABLED:-false}
+    ports:
+      - "${BACKEND_PORT:-8080}:8080"
+    networks:
+      - restosync
+
+  frontend:
+    build:
+      context: ./ViewRestoSync
+      args:
+        VITE_API_BASE_URL: ${VITE_API_BASE_URL:-http://localhost:8080/api}
+        VITE_WS_URL: ${VITE_WS_URL:-http://localhost:8080/ws}
+    container_name: restosync-frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "${FRONTEND_PORT:-4173}:4173"
+    networks:
+      - restosync
+
+volumes:
+  mysql_data:
+
+networks:
+  restosync:
+    driver: bridge

@@ -3,6 +3,7 @@ package com.restosync.comandas.config;
 import com.restosync.comandas.security.JwtAuthFilter;
 import com.restosync.comandas.security.UserDetailsServiceImpl;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -56,6 +57,9 @@ public class SecurityConfig {
         private final JwtAuthFilter jwtAuthFilter;
         private final UserDetailsServiceImpl userDetailsService;
 
+        @Value("${app.cors.allowed-origins:http://localhost:5173,http://localhost:4173}")
+        private String allowedOrigins;
+
         // ── Security filter chain ─────────────────────────────────────────────────
 
         @Bean
@@ -84,15 +88,17 @@ public class SecurityConfig {
                                                 .permitAll()
 
                                                 // ── Pedidos: acciones del Mesero ──────────────────────────────
-                                                .requestMatchers(HttpMethod.POST, "/api/orders").hasRole("MESERO")
+                                                .requestMatchers(HttpMethod.POST, "/api/orders")
+                                                .hasAnyRole("MESERO", "ADMINISTRADOR")
                                                 .requestMatchers(HttpMethod.PATCH, "/api/orders/*/items")
-                                                .hasRole("MESERO")
-                                                .requestMatchers(HttpMethod.DELETE, "/api/orders/*").hasRole("MESERO")
+                                                .hasAnyRole("MESERO", "ADMINISTRADOR")
+                                                .requestMatchers(HttpMethod.DELETE, "/api/orders/*")
+                                                .hasAnyRole("MESERO", "ADMINISTRADOR")
 
                                                 // ── Pedidos: cambio de estado (Cocinero, Bartender, Mesero) ──
                                                 // La validación fina de rol por categoría se hace en OrderService
                                                 .requestMatchers(HttpMethod.PATCH, "/api/orders/*/status")
-                                                .hasAnyRole("COCINERO", "BARTENDER", "MESERO")
+                                                .hasAnyRole("COCINERO", "BARTENDER", "MESERO", "ADMINISTRADOR")
 
                                                 // ── Pedidos: lectura (todos los roles autenticados) ────────────
                                                 .requestMatchers(HttpMethod.GET, "/api/orders/**").authenticated()
@@ -154,10 +160,7 @@ public class SecurityConfig {
                 CorsConfiguration config = new CorsConfiguration();
 
                 // Orígenes permitidos: frontend en dev y prod
-                config.setAllowedOrigins(List.of(
-                                "http://localhost:5173", // Vite dev server
-                                "http://localhost:4173" // Vite preview
-                ));
+                config.setAllowedOrigins(List.of(allowedOrigins.split(",")));
 
                 config.setAllowedMethods(List.of(
                                 "GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
